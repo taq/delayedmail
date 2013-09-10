@@ -2,11 +2,12 @@
 namespace DelayedMail;
 
 class Server {
-   private $host  = null;
-   private $port  = null;
-   private $user  = null;
-   private $pwd   = null;
-   private $cfg   = null;
+   private $host;
+   private $port;
+   private $user;
+   private $pwd;
+   private $cfg;
+   private $handle;
 
    public function __construct() {
       $this->port = 25;
@@ -75,5 +76,48 @@ class Server {
             continue;
          $props[$i] = $matches[3];
       }
+   }
+
+   public function open($domain=null) {
+      $this->handle = fsockopen($this->host,$this->port,$errno,$errstr,30);
+
+      if($domain)
+         $this->command("EHLO $domain\r\n");
+
+      if(!is_null($this->user) &&
+         !is_null($this->pwd)) {
+         $this->command("AUTH LOGIN\r\n");
+         $this->command(base64_encode($this->user)."\r\n");
+         $this->command(base64_encode($this->pwd)."\r\n");
+      }
+      return $this->handle;
+   }
+
+   public function close() {
+      if(!$this->handle)
+         return false;
+      fputs("QUIT\r\n");
+      fflush($this->handle);
+      fclose($this->handle);
+   }
+
+   public function command($cmd,$wait=true) {
+      if(!$this->handle)
+         return false;
+
+      fputs($this->handle,$cmd);
+      return $wait ? $this->wait() : "";
+   }
+
+   private function wait() {
+      if(!$this->handle)
+         return false;
+
+      $rtn     = fgets($this->handle);
+      $status  = socket_get_status($this->handle);
+      $left    = intval($status["unread_bytes"]); 
+      if($left>0)
+         $rtn .= fread($this->handle,$left);
+      return $rtn;
    }
 }
