@@ -20,7 +20,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
 
    public function testPush() {
       $message = new DelayedMail\Message();
-      $message->from("Eustaquio Rangel <eustaquiorangel@gmail.com>")->
+      $message->from("taq <eustaquiorangel@gmail.com>")->
                   to("Eustaquio Rangel <taq@bluefish.com.br>")->
              subject("DelayedMail test!")->
                 text("This is just\na test!");

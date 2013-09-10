@@ -9,11 +9,13 @@ class Server {
    private $cfg;
    private $handle;
    private $path;
+   private $domain;
 
    public function __construct($cfg=null) {
-      $this->port = 25;
-      $this->path = "/tmp/delayedmail";
-      $this->cfg  = $cfg;
+      $this->port    = 25;
+      $this->path    = "/tmp/delayedmail";
+      $this->domain  = "delayedmail.com";
+      $this->cfg     = $cfg;
       if($this->cfg)
          $this->readConfig();
    }
@@ -62,12 +64,14 @@ class Server {
                         '/(port)(\s?=\s?)(.*)/i',
                         '/(user)(\s?=\s?)(.*)/i',
                         '/(password)(\s?=\s?)(.*)/i',
+                        '/(domain)(\s?=\s?)(.*)/i',
                         '/(path)(\s?=\s?)(.*)/i');
 
       $props    = array(&$this->host,
                         &$this->port,
                         &$this->user,
                         &$this->pwd,
+                        &$this->domain,
                         &$this->path);
 
       for($i=0, $t=sizeof($tests); $i<$t; $i++) {
@@ -77,11 +81,12 @@ class Server {
       }
    }
 
-   public function open($domain=null) {
+   public function open() {
       $this->handle = fsockopen($this->host,$this->port,$errno,$errstr,30);
+      if(!$this->handle)
+         return false;
 
-      if($domain)
-         $this->command("EHLO $domain\r\n");
+      $this->command("EHLO ".$this->domain."\r\n");
 
       if(!is_null($this->user) &&
          !is_null($this->pwd)) {
@@ -92,10 +97,16 @@ class Server {
       return $this->handle;
    }
 
+   public function flush() {
+      if(!$this->handle)
+         return false;
+      fflush($this->handle);
+   }
+
    public function close() {
       if(!$this->handle)
          return false;
-      fputs("QUIT\r\n");
+      fputs($this->handle,"QUIT\r\n");
       fflush($this->handle);
       fclose($this->handle);
    }
@@ -105,7 +116,17 @@ class Server {
          return false;
 
       fputs($this->handle,$cmd);
-      return $wait ? $this->wait() : "";
+      $rtn = $wait ? $this->wait() : "";
+      if(preg_match('/^[45]/',$rtn)) {
+         echo "* error: $rtn\n";
+         $this->handle = null;
+         return false;
+      }
+      return $rtn;
+   }
+
+   public function getHandle() {
+      return $this->handle;
    }
 
    private function wait() {
