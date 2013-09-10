@@ -74,10 +74,11 @@ class Sender {
       $rst .= $this->server->command("$text\r\n",true);
       $rst .= $this->server->command(".\r\n",true);
       $this->server->flush();
-      echo $rst;
 
-      if(!$this->server->getHandle())
+      if(!$this->server->getHandle()) {
+         echo "* could not send email\n";
          return false;
+      }
 
       if(!$this->move($file,$this->getSentPath($file)))
          return false;

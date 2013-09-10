@@ -85,10 +85,12 @@ class Server {
       $this->handle = fsockopen($this->host,$this->port,$errno,$errstr,30);
       if(!$this->handle)
          return false;
+      $this->wait();
 
-      $this->command("EHLO ".$this->domain."\r\n");
+      $ehlo = $this->command("EHLO ".$this->domain."\r\n");
 
-      if(!is_null($this->user) &&
+      if(preg_match('/250 AUTH/sim',$ehlo) &&
+         !is_null($this->user) &&
          !is_null($this->pwd)) {
          $this->command("AUTH LOGIN\r\n");
          $this->command(base64_encode($this->user)."\r\n");
@@ -116,8 +118,9 @@ class Server {
          return false;
 
       fputs($this->handle,$cmd);
+      fflush($this->handle);
       $rtn = $wait ? $this->wait() : "";
-      if(preg_match('/^[45]/',$rtn)) {
+      if(preg_match('/^[45]/sim',$rtn)) {
          echo "* error: $rtn\n";
          $this->handle = null;
          return false;
@@ -136,7 +139,7 @@ class Server {
       $rtn     = fgets($this->handle);
       $status  = socket_get_status($this->handle);
       $left    = intval($status["unread_bytes"]); 
-      if($left>0)
+      if($left>0) 
          $rtn .= fread($this->handle,$left);
       return $rtn;
    }
