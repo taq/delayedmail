@@ -10,9 +10,12 @@ class Server {
    private $handle;
    private $path;
 
-   public function __construct() {
+   public function __construct($cfg=null) {
       $this->port = 25;
       $this->path = "/tmp/delayedmail";
+      $this->cfg  = $cfg;
+      if($this->cfg)
+         $this->readConfig();
    }
 
    public function config($cfg) {
@@ -42,7 +45,7 @@ class Server {
    }
 
    public function getDeliveryPath() {
-      return $this->path."/deliver";
+      return $this->path."/delivery";
    }
 
    public function getSentPath() {
@@ -125,7 +128,7 @@ class Server {
       return true;
    }
 
-   private function makeDeliverPath() {
+   private function makeDeliveryPath() {
       if(!file_exists($this->getDeliveryPath())) {
          if(!mkdir($this->getDeliveryPath()))
             return false;
@@ -143,7 +146,7 @@ class Server {
 
    public function push($msg) {
       if(!$this->makeBasePath()     ||
-         !$this->makeDeliverPath()  ||
+         !$this->makeDeliveryPath() ||
          !$this->makeSentPath())
          return false;
 
