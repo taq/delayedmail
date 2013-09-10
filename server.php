@@ -21,36 +21,16 @@ class Server {
       return $this;
    }
 
-   public function host($host) {
-      $this->host = $host;
-      return $this;
-   }
-
    public function getHost() {
       return $this->host;
-   }
-
-   public function port($port) {
-      $this->port = $port;
-      return $this;
    }
 
    public function getPort() {
       return $this->port;
    }
 
-   public function user($user) {
-      $this->user = $user;
-      return $this;
-   }
-
    public function getUser() {
       return $this->user;
-   }
-
-   public function password($pwd) {
-      $this->pwd = $pwd;
-      return $this;
    }
 
    public function getPassword() {
@@ -59,6 +39,14 @@ class Server {
 
    public function getPath() {
       return $this->path;
+   }
+
+   public function getDeliveryPath() {
+      return $this->path."/deliver";
+   }
+
+   public function getSentPath() {
+      return $this->path."/sent";
    }
 
    private function readConfig() {
@@ -127,5 +115,39 @@ class Server {
       if($left>0)
          $rtn .= fread($this->handle,$left);
       return $rtn;
+   }
+
+   private function makeBasePath() {
+      if(!file_exists($this->path)) {
+         if(!mkdir($this->path))
+            return false;
+      }
+      return true;
+   }
+
+   private function makeDeliverPath() {
+      if(!file_exists($this->getDeliveryPath())) {
+         if(!mkdir($this->getDeliveryPath()))
+            return false;
+      }
+      return true;
+   }
+
+   private function makeSentPath() {
+      if(!file_exists($this->getSentPath())) {
+         if(!mkdir($this->getSentPath()))
+            return false;
+      }
+      return true;
+   }
+
+   public function push($msg) {
+      if(!$this->makeBasePath()     ||
+         !$this->makeDeliverPath()  ||
+         !$this->makeSentPath())
+         return false;
+
+      $file = tempnam($this->getDeliveryPath(),"delayedmail");
+      file_put_contents($file,$msg);
    }
 }
