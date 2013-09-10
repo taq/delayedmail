@@ -8,9 +8,11 @@ class Server {
    private $pwd;
    private $cfg;
    private $handle;
+   private $path;
 
    public function __construct() {
       $this->port = 25;
+      $this->path = "/tmp/delayedmail";
    }
 
    public function config($cfg) {
@@ -55,6 +57,10 @@ class Server {
       return $this->pwd;
    }
 
+   public function getPath() {
+      return $this->path;
+   }
+
    private function readConfig() {
       if(!file_exists($this->cfg))
          return false;
@@ -64,12 +70,14 @@ class Server {
       $tests    = array('/(host)(\s?=\s?)(.*)/i',
                         '/(port)(\s?=\s?)(.*)/i',
                         '/(user)(\s?=\s?)(.*)/i',
-                        '/(password)(\s?=\s?)(.*)/i');
+                        '/(password)(\s?=\s?)(.*)/i',
+                        '/(path)(\s?=\s?)(.*)/i');
 
       $props    = array(&$this->host,
                         &$this->port,
                         &$this->user,
-                        &$this->pwd);
+                        &$this->pwd,
+                        &$this->path);
 
       for($i=0, $t=sizeof($tests); $i<$t; $i++) {
          if(!preg_match($tests[$i],$contents,$matches))

@@ -14,6 +14,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals("587",self::$server->getPort());
       $this->assertEquals("taq",self::$server->getUser());
       $this->assertEquals("secret",self::$server->getPassword());
+      $this->assertEquals("/tmp/delayedmailtest",self::$server->getPath());
    }
 }
 ?>
