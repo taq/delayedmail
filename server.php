@@ -141,7 +141,6 @@ class Server {
       if(is_null($str))
          return true;
 
-
       if(preg_match('/^[45]/sim',$str)) {
          echo "* error: $str\n";
          echo "* command was $cmd\n";
@@ -206,6 +205,6 @@ class Server {
          return false;
 
       $file = tempnam($this->getDeliveryPath(),"delayedmail");
-      file_put_contents($file,$msg);
+      return file_put_contents($file,$msg);
    }
 }
