@@ -118,7 +118,8 @@ class Sender {
       $tokens = preg_split('/\n\n/sim',$contents);
       if(sizeof($tokens)<2)
          return null;
-      return $tokens[1];
+      $text = join("\n\n",array_slice($tokens,1));
+      return $text;
    }
 
    private function getStrippedEmail($email) {

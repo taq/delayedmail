@@ -48,7 +48,8 @@ configure it, compose and queue a new message:
    $msg->from("taq <eustaquiorangel@gmail.com>")->
            to("Eustaquio Rangel <taq@bluefish.com.br>")->
       subject("DelayedMail test!")->
-         text("This is just\na test!");
+         text("This is just\na test!")->
+       attach("taq.jpg");
    $server->push($msg);
 ?>
 ```

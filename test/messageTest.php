@@ -25,5 +25,24 @@ a test!
 EOT;
       $this->assertEquals($exp,$str);
    }
+
+   public function testToStringWithAttachments() {
+      self::$message->from("Eustaquio Rangel <eustaquiorangel@gmail.com>")->
+                      to("Eustaquio Rangel <taq@bluefish.com.br>")->
+                      subject("DelayedMail test!")->
+                      text("This is just\na test!")->
+                      attach(array("taq.jpg","qat.jpg"));
+      $str = self::$message."";
+      $exp = <<<EOT
+From: Eustaquio Rangel <eustaquiorangel@gmail.com>
+To: Eustaquio Rangel <taq@bluefish.com.br>
+Content-Type: text/plain
+Subject: DelayedMail test!
+
+This is just
+a test!
+EOT;
+      $this->assertEquals(file_get_contents("attachment.txt"),$str);
+   }
 }
 ?>

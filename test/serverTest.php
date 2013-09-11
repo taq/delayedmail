@@ -26,5 +26,15 @@ class ServerTest extends PHPUnit_Framework_TestCase {
                 text("This is just\na test!");
       self::$server->push($message);
    }
+
+   public function testPushWithAttachment() {
+      $message = new DelayedMail\Message();
+      $message->from("taq <eustaquiorangel@gmail.com>")->
+                  to("Eustaquio Rangel <taq@bluefish.com.br>")->
+             subject("DelayedMail test!")->
+                text("This is just\na test!")->
+              attach(array("taq.jpg","qat.jpg"));
+      self::$server->push($message);
+   }
 }
 ?>
