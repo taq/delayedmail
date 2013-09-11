@@ -20,10 +20,6 @@ class Sender {
 
       while(true) {
          sleep($this->interval);
-         if(!$this->server->open()) {
-            echo "* could not open mail server.\n";
-            continue;
-         }
 
          echo "- checking for files in {$delivery_path} ...\n";
          $files = array_filter(glob("$delivery_path/*"),function($file) {
@@ -35,6 +31,11 @@ class Sender {
             continue;
          }
          echo "- ".sizeof($files)." files found.\n";
+
+         if(!$this->server->open()) {
+            echo "* could not open mail server.\n";
+            continue;
+         }
 
          foreach($files as $file) 
             $this->proc($file);
