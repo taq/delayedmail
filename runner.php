@@ -1,8 +1,6 @@
 <?php
 namespace DelayedMail;
-include_once "message.php";
-include_once "server.php";
-include_once "sender.php";
+include_once "delayedmail.php";
 
 $sender = new Sender(5,"delayedmail.ini");
 $sender->run();
