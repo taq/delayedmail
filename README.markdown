@@ -67,7 +67,7 @@ Just edit the `runner.php` file with the desired interval and configuration file
 namespace DelayedMail;
 include_once "delayedmail.php";
 
-$sender = new Sender(5,"delayedmail.ini");
+$sender = new Sender(5,"myconfigs.ini");
 $sender->run();
 ?>
 ```
