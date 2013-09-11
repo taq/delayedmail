@@ -52,8 +52,8 @@ class Message {
       $str = <<<EOT
 From: {$this->from}
 To: {$this->to}
-Content-Type: {$this->type}
 Subject: {$this->subject}
+Content-Type: {$this->type}
 
 {$this->text}
 EOT;
@@ -66,12 +66,17 @@ EOT;
       $str = <<<EOT
 From: {$this->from}
 To: {$this->to}
-Content-Type: multipart/mixed; boundary={$marker}
 Subject: {$this->subject}
+Content-Type: multipart/mixed; boundary={$marker}
+
+--{$marker}
+Content-Type: multipart/alternative; boundary={$markert}
 
 --{$markert}
-Content-type: text/plain
+Content-Type: text/plain
+
 {$this->text}
+
 --{$markert}--
 EOT;
 
