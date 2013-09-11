@@ -49,7 +49,7 @@ configure it, compose and queue a new message:
            to("Eustaquio Rangel <taq@bluefish.com.br>")->
       subject("DelayedMail test!")->
          text("This is just\na test!");
-   self::$server->push($msg);
+   $server->push($msg);
 ?>
 ```
 
