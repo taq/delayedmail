@@ -10,11 +10,15 @@ class Server {
    private $handle;
    private $path;
    private $domain;
+   private $auth;
+   private $tls;
 
    public function __construct($cfg=null) {
       $this->port    = 25;
       $this->path    = "/tmp/delayedmail";
       $this->domain  = "delayedmail.com";
+      $this->auth    = false;
+      $this->tls     = false;
       $this->cfg     = $cfg;
       if($this->cfg)
          $this->readConfig();
@@ -86,17 +90,28 @@ class Server {
       if(!$this->handle)
          return false;
       $this->wait();
+      $this->ehlo();
+      return $this->handle;
+   }
 
-      $ehlo = $this->command("EHLO ".$this->domain."\r\n");
+   private function ehlo() {
+      $this->command("EHLO ".$this->domain."\r\n");
+   }
 
-      if(preg_match('/250 AUTH/sim',$ehlo) &&
-         !is_null($this->user) &&
+   private function auth() {
+      if(!is_null($this->user) &&
          !is_null($this->pwd)) {
+
+         if($this->tls) {
+            $this->command("STARTTLS\n");
+            stream_socket_enable_crypto($this->handle,true,STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            $this->ehlo();
+         }
+
          $this->command("AUTH LOGIN\r\n");
          $this->command(base64_encode($this->user)."\r\n");
          $this->command(base64_encode($this->pwd)."\r\n");
       }
-      return $this->handle;
    }
 
    public function flush() {
@@ -119,13 +134,30 @@ class Server {
 
       fputs($this->handle,$cmd);
       fflush($this->handle);
-      $rtn = $wait ? $this->wait() : "";
-      if(preg_match('/^[45]/sim',$rtn)) {
-         echo "* error: $rtn\n";
+      return $this->message($wait ? $this->wait() : null,$cmd);
+   }
+
+   private function message($str,$cmd) {
+      if(is_null($str))
+         return true;
+
+
+      if(preg_match('/^[45]/sim',$str)) {
+         echo "* error: $str\n";
+         echo "* command was $cmd\n";
          $this->handle = null;
          return false;
       }
-      return $rtn;
+
+      if(preg_match('/STARTTLS/sim',$str)) {
+         echo "- enabling TLS\n";
+         $this->tls = true;
+         $this->auth();
+      }
+
+      if(preg_match('/250 AUTH/sim',$str))
+         $this->auth();
+      return true;
    }
 
    public function getHandle() {

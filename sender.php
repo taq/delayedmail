@@ -64,15 +64,15 @@ class Sender {
 
       $rst = "";
 
-      $rst .= $this->server->command("MAIL FROM: $stripped_from\r\n",true);
-      $rst .= $this->server->command("RCPT TO: $stripped_to\r\n",true);
-      $rst .= $this->server->command("DATA\n",false);
+      $rst .= $this->server->command("MAIL FROM: <$stripped_from>\r\n",true);
+      $rst .= $this->server->command("RCPT TO: <$stripped_to>\r\n",true);
+      $rst .= $this->server->command("DATA\r\n",true);
       $rst .= $this->server->command("From: $from\n",false);
       $rst .= $this->server->command("To: $to\n",false);
       $rst .= $this->server->command("Content-Type: $type\r\n",false);
       $rst .= $this->server->command("Subject: $subj\n\n",false);
-      $rst .= $this->server->command("$text\r\n",true);
-      $rst .= $this->server->command(".\r\n",true);
+      $rst .= $this->server->command("$text\r\n",false);
+      $rst .= $this->server->command("\r\n.\r\n",true);
       $this->server->flush();
 
       if(!$this->server->getHandle()) {
