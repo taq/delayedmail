@@ -11,7 +11,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
 
    public function testConfig() {
       self::$server->config("delayedmail.ini");
-      $this->assertEquals("gmail.com",self::$server->getHost());
+      $this->assertEquals("smtp.gmail.com",self::$server->getHost());
       $this->assertEquals("587",self::$server->getPort());
       $this->assertEquals("taq",self::$server->getUser());
       $this->assertEquals("secret",self::$server->getPassword());

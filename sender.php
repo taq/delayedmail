@@ -30,7 +30,7 @@ class Sender {
             echo "- no files found.\n";
             continue;
          }
-         echo "- ".sizeof($files)." files found.\n";
+         echo "- ".sizeof($files)." file(s) found.\n";
 
          if(!$this->server->open()) {
             echo "* could not open mail server.\n";

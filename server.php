@@ -150,7 +150,6 @@ class Server {
       }
 
       if(preg_match('/STARTTLS/sim',$str)) {
-         echo "- enabling TLS\n";
          $this->tls = true;
          $this->auth();
       }
