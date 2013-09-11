@@ -8,6 +8,7 @@ class Message {
    private $text     = null;
    private $type     = null;
    private $files    = null;
+   private $marker   = null;
 
    public function __construct() {
       $this->type  = "text/plain";
@@ -34,6 +35,11 @@ class Message {
       return $this;
    }
 
+   public function marker($marker) {
+      $this->marker = $marker;
+      return $this;
+   }
+
    public function attach($file) {
       if(is_array($file))
          $this->files = array_merge($this->files,$file);
@@ -55,7 +61,7 @@ EOT;
    }
 
    private function attachmentsMessageText() {
-      $marker  = time();
+      $marker  = is_null($this->marker) ? time() : $this->marker;
       $markert = $marker+1;
       $str = <<<EOT
 From: {$this->from}
@@ -85,7 +91,7 @@ EOT;
          $str .= $file_str;
       }
       $str .= "\n--{$marker}--";
-      return $str;
+      return trim($str);
    }
 
    public function __toString() {
