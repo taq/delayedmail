@@ -55,6 +55,7 @@ class Sender {
 
       $from = $this->getFrom($contents);
       $to   = $this->getTo($contents);
+      $cc   = $this->getCC($contents);
       $subj = $this->getSubject($contents);
       $subj = $this->getSubject($contents);
       $type = $this->getContentType($contents);
@@ -70,6 +71,10 @@ class Sender {
       $rst .= $this->server->command("DATA\r\n",true);
       $rst .= $this->server->command("From: $from\n",false);
       $rst .= $this->server->command("To: $to\n",false);
+
+      if(!is_null($cc))
+         $rst .= $this->server->command("Cc: $cc\n",false);
+      
       $rst .= $this->server->command("Content-Type: $type\r\n",false);
       $rst .= $this->server->command("Subject: $subj\n\n",false);
       $rst .= $this->server->command("$text\r\n",false);
@@ -86,32 +91,31 @@ class Sender {
       return true;
    }
 
-   private function getFrom($contents) {
-      $ok = preg_match('/^(From:\s?)([^\n]+)/sim',$contents,$matches);
+   private function find($regex,$contents,$default=null) {
+      $ok = preg_match($regex,$contents,$matches);
       if(!$ok)
-         return null;
+         return $default;
       return $matches[2];
+   }
+
+   private function getFrom($contents) {
+      return $this->find('/^(From:\s?)([^\n]+)/sim',$contents);
    }
 
    private function getTo($contents) {
-      $ok = preg_match('/^(To:\s?)([^\n]+)/sim',$contents,$matches);
-      if(!$ok)
-         return null;
-      return $matches[2];
+      return $this->find('/^(To:\s?)([^\n]+)/sim',$contents);
+   }
+
+   private function getCC($contents) {
+      return $this->find('/^(Cc:\s?)([^\n]+)/sim',$contents);
    }
 
    private function getSubject($contents) {
-      $ok = preg_match('/^(Subject:\s?)([^\n]+)/sim',$contents,$matches);
-      if(!$ok)
-         return null;
-      return $matches[2];
+      return $this->find('/^(Subject:\s?)([^\n]+)/sim',$contents);
    }
 
    private function getContentType($contents) {
-      $ok = preg_match('/^(Content-Type:\s?)([^\n]+)/sim',$contents,$matches);
-      if(!$ok)
-         return null;
-      return $matches[2];
+      return $this->find('/^(Content-Type:\s?)([^\n]+)/sim',$contents);
    }
 
    private function getText($contents) {
@@ -123,13 +127,7 @@ class Sender {
    }
 
    private function getStrippedEmail($email) {
-      $ok = preg_match('/(<)(.*)(>)/',$email,$matches);
-      if(!$ok)
-         return $email;
-      return $matches[2];
-   }
-
-   private function send($file) {
+      return $this->find('/(<)(.*)(>)/',$email,$email);
    }
 
    private function move($from,$to) {
