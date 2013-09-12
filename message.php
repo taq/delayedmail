@@ -84,10 +84,11 @@ EOT;
          $contents = base64_encode(file_get_contents($file));
          $contents = join("\n",str_split($contents,76));
          $mime     = mime_content_type($file);
+         $base     = basename($file);
          $file_str = <<<EOT
 \n\n--{$marker}
-Content-Type: {$mime}; name="{$file}"
-Content-Disposition: attachment; filename="{$file}"
+Content-Type: {$mime}; name="{$base}"
+Content-Disposition: attachment; filename="{$base}"
 Content-Transfer-Encoding: base64
 X-Attachment-Id: 1
 
