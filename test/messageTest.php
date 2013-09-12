@@ -13,17 +13,17 @@ class MessageTest extends PHPUnit_Framework_TestCase {
                       to("Eustaquio Rangel <taq@bluefish.com.br>")->
                       subject("DelayedMail test!")->
                       text("This is just\na test!");
-      $str = self::$message."";
+      $str = self::$message;
       $exp = <<<EOT
 From: Eustaquio Rangel <eustaquiorangel@gmail.com>
 To: Eustaquio Rangel <taq@bluefish.com.br>
-Content-Type: text/plain
 Subject: DelayedMail test!
+Content-Type: text/plain
 
 This is just
 a test!
 EOT;
-      $this->assertEquals($exp,$str);
+      $this->assertEquals(trim($exp),trim($str));
    }
 
    public function testToStringWithAttachments() {
@@ -31,7 +31,7 @@ EOT;
                       to("Eustaquio Rangel <taq@bluefish.com.br>")->
                       subject("DelayedMail test!")->
                       text("This is just\na test!")->
-                      attach(array("taq.jpg","qat.jpg"))->
+                      attach(array("./taq.jpg","./qat.jpg"))->
                       marker(1378910636);
       $str = self::$message;
       $this->assertEquals(trim(file_get_contents("attachment.txt")),trim("$str"));

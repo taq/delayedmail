@@ -1,12 +1,17 @@
 From: Eustaquio Rangel <eustaquiorangel@gmail.com>
 To: Eustaquio Rangel <taq@bluefish.com.br>
-Content-Type: multipart/mixed; boundary=1378910636
 Subject: DelayedMail test!
+Content-Type: multipart/mixed; boundary=1378910636
+
+--1378910636
+Content-Type: multipart/alternative; boundary=1378910637
 
 --1378910637
-Content-type: text/plain
+Content-Type: text/plain
+
 This is just
 a test!
+
 --1378910637--
 
 --1378910636
