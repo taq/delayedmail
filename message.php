@@ -9,6 +9,7 @@ class Message {
    private $type     = null;
    private $files    = null;
    private $marker   = null;
+   private $cc       = null;
 
    public function __construct() {
       $this->type  = "text/plain";
@@ -22,6 +23,11 @@ class Message {
 
    public function to($to) {
       $this->to = $to;
+      return $this;
+   }
+
+   public function cc($cc) {
+      $this->cc = $cc;
       return $this;
    }
 
@@ -48,11 +54,25 @@ class Message {
       return $this;
    }
 
-   private function simpleMessageText() {
+   private function ccText() {
+      if(is_null($this->cc))
+         return "";
+      $cc = "\nCc: ".(is_array($this->cc) ? join(", ",$this->cc) : $this->cc);
+      return $cc;
+   }
+
+   private function header() {
       $str = <<<EOT
 From: {$this->from}
-To: {$this->to}
+To: {$this->to}{$this->ccText()}
 Subject: {$this->subject}
+EOT;
+      return $str;
+   }
+
+   private function simpleMessageText() {
+      $str = <<<EOT
+{$this->header()}
 Content-Type: {$this->type}
 
 {$this->text}
@@ -64,9 +84,7 @@ EOT;
       $marker  = is_null($this->marker) ? time() : $this->marker;
       $markert = $marker+1;
       $str = <<<EOT
-From: {$this->from}
-To: {$this->to}
-Subject: {$this->subject}
+{$this->header()}
 Content-Type: multipart/mixed; boundary={$marker}
 
 --{$marker}
@@ -106,5 +124,4 @@ EOT;
       return $this->attachmentsMessageText();
    }
 }
-
 ?>
