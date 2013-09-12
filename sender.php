@@ -68,6 +68,15 @@ class Sender {
 
       $rst .= $this->server->command("MAIL FROM: <$stripped_from>\r\n",true);
       $rst .= $this->server->command("RCPT TO: <$stripped_to>\r\n",true);
+
+      if(!is_null($cc)) {
+         $tokens = explode(",",$cc);
+         foreach($tokens as $cc) {
+            $cc = $this->getStrippedEmail($cc);
+            $rst .= $this->server->command("RCPT TO: <$cc>\r\n",true);
+         }
+      }
+
       $rst .= $this->server->command("DATA\r\n",true);
       $rst .= $this->server->command("From: $from\n",false);
       $rst .= $this->server->command("To: $to\n",false);

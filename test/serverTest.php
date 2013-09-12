@@ -32,7 +32,7 @@ class ServerTest extends PHPUnit_Framework_TestCase {
       $message->from("taq <eustaquiorangel@gmail.com>")->
                   to("Eustaquio Rangel <taq@bluefish.com.br>")->
                   cc("Eustaquio Rangel <taq@eustaquiorangel.com>")->
-             subject("DelayedMail test!")->
+             subject("DelayedMail test with CC!")->
                 text("This is just\na test!");
       self::$server->push($message);
    }
