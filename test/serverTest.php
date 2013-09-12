@@ -27,6 +27,16 @@ class ServerTest extends PHPUnit_Framework_TestCase {
       self::$server->push($message);
    }
 
+   public function testPushWithCC() {
+      $message = new DelayedMail\Message();
+      $message->from("taq <eustaquiorangel@gmail.com>")->
+                  to("Eustaquio Rangel <taq@bluefish.com.br>")->
+                  cc("Eustaquio Rangel <taq@eustaquiorangel.com>")->
+             subject("DelayedMail test!")->
+                text("This is just\na test!");
+      self::$server->push($message);
+   }
+
    public function testPushWithAttachment() {
       $message = new DelayedMail\Message();
       $message->from("taq <eustaquiorangel@gmail.com>")->
