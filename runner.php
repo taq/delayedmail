@@ -1,7 +1,8 @@
 <?php
-namespace DelayedMail;
-include_once "delayedmail.php";
+$dir = dirname(__FILE__);
+echo "- loading classes from $dir\n";
+include_once "$dir/delayedmail.php";
 
-$sender = new Sender(5,"delayedmail.ini");
+$sender = new DelayedMail\Sender(5,"delayedmail.ini");
 $sender->run();
 ?>
