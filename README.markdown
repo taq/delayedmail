@@ -29,8 +29,9 @@ mail files will be stored.
 The data store used are just regular plain text files. They are stored on the
 `path` configured above. On that dir there will be another two subdirs:
 
-- `delivery` where the queued messages are
+- `delivery` where the queued messages are.
 - `sent`, where the messages are moved *after* `Sender` send them.
+- `error`, where the messages are moved if there are some errors on them.
 
 ## How to use it
 
@@ -47,6 +48,7 @@ configure it, compose and queue a new message:
    $msg    = new DelayedMail\Message();
    $msg->from("taq <eustaquiorangel@gmail.com>")->
            to("Eustaquio Rangel <taq@bluefish.com.br>")->
+           cc("Eustaquio Rangel <taq@anotherhost.com>")->
       subject("DelayedMail test!")->
          text("This is just\na test!")->
        attach("taq.jpg");
@@ -57,6 +59,8 @@ configure it, compose and queue a new message:
 If you check the `delivery` dir now, there will be a file there with the message
 contents.
 
+You can use arrays on `attach` and `cc`.
+
 ### Running the runner
 
 Just edit the `runner.php` file with the desired interval and configuration file
@@ -64,10 +68,11 @@ Just edit the `runner.php` file with the desired interval and configuration file
 
 ```
 <?php
-namespace DelayedMail;
-include_once "delayedmail.php";
+$dir = dirname(__FILE__);
+echo "- loading classes from $dir\n";
+include_once "$dir/delayedmail.php";
 
-$sender = new Sender(5,"myconfigs.ini");
+$sender = new DelayedMail\Sender(5,"delayedmail.ini");
 $sender->run();
 ?>
 ```
