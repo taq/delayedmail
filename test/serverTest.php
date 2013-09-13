@@ -18,11 +18,25 @@ class ServerTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals("/tmp/delayedmailtest",self::$server->getPath());
    }
 
+   /**
+    * The following tests are used just to push messages to the server.
+    * To check if they are working, you must configure a .ini file with some 
+    * valid configuration and run the Runner class.
+    */
    public function testPush() {
       $message = new DelayedMail\Message();
       $message->from("taq <eustaquiorangel@gmail.com>")->
                   to("Eustaquio Rangel <taq@bluefish.com.br>")->
              subject("DelayedMail test!")->
+                text("This is just\na test!");
+      self::$server->push($message);
+   }
+
+   public function testError() {
+      $message = new DelayedMail\Message();
+      $message->from("taq <eustaquiorangel@gmail.com>")->
+                  to("Eustaquio Rangel")->
+             subject("DelayedMail test with error!")->
                 text("This is just\na test!");
       self::$server->push($message);
    }
