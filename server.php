@@ -12,6 +12,7 @@ class Server {
    private $domain;
    private $auth;
    private $tls;
+   private $error;
 
    public function __construct($cfg=null) {
       $this->port    = 25;
@@ -20,6 +21,7 @@ class Server {
       $this->auth    = false;
       $this->tls     = false;
       $this->cfg     = $cfg;
+      $this->error   = false;
       if($this->cfg)
          $this->readConfig();
    }
@@ -56,6 +58,10 @@ class Server {
 
    public function getSentPath() {
       return $this->path."/sent";
+   }
+
+   public function getErrorPath() {
+      return $this->path."/error";
    }
 
    private function readConfig() {
@@ -143,8 +149,8 @@ class Server {
 
       if(preg_match('/^[45]/sim',$str)) {
          echo "* error: $str\n";
-         echo "* command was $cmd\n";
-         $this->handle = null;
+         echo "* command was: $cmd\n";
+         $this->error = true;
          return false;
       }
 
@@ -162,6 +168,14 @@ class Server {
       return $this->handle;
    }
 
+   public function getError() {
+      return $this->error;
+   }
+
+   public function setError($error) {
+      $this->error = $error;
+   }
+
    private function wait() {
       if(!$this->handle)
          return false;
@@ -174,33 +188,34 @@ class Server {
       return $rtn;
    }
 
-   private function makeBasePath() {
-      if(!file_exists($this->path)) {
-         if(!mkdir($this->path))
+   private function makePath($path) {
+      if(!file_exists($path)) {
+         if(!mkdir($path))
             return false;
       }
       return true;
+   }
+
+   private function makeBasePath() {
+      return $this->makePath($this->path);
    }
 
    private function makeDeliveryPath() {
-      if(!file_exists($this->getDeliveryPath())) {
-         if(!mkdir($this->getDeliveryPath()))
-            return false;
-      }
-      return true;
+      return $this->makePath($this->getDeliveryPath());
    }
 
    private function makeSentPath() {
-      if(!file_exists($this->getSentPath())) {
-         if(!mkdir($this->getSentPath()))
-            return false;
-      }
-      return true;
+      return $this->makePath($this->getSentPath());
+   }
+
+   private function makeErrorPath() {
+      return $this->makePath($this->getErrorPath());
    }
 
    public function push($msg) {
       if(!$this->makeBasePath()     ||
          !$this->makeDeliveryPath() ||
+         !$this->makeErrorPath()    ||
          !$this->makeSentPath())
          return false;
 

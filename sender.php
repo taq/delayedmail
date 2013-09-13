@@ -49,6 +49,11 @@ class Sender {
       return "$sent_path/".basename($file);
    }
 
+   private function getErrorPath($file) {
+      $error_path = $this->server->getErrorPath();
+      return "$error_path/".basename($file);
+   }
+
    private function proc($file) {
       echo "- processing $file ...\n";
       $contents = file_get_contents($file);
@@ -64,8 +69,9 @@ class Sender {
       $stripped_from = $this->getStrippedEmail($from);
       $stripped_to   = $this->getStrippedEmail($to);
 
-      $rst = "";
+      $this->server->setError(false);
 
+      $rst  = "";
       $rst .= $this->server->command("MAIL FROM: <$stripped_from>\r\n",true);
       $rst .= $this->server->command("RCPT TO: <$stripped_to>\r\n",true);
 
@@ -90,8 +96,10 @@ class Sender {
       $rst .= $this->server->command("\r\n.\r\n",true);
       $this->server->flush();
 
-      if(!$this->server->getHandle()) {
+      if($this->server->getError()) {
          echo "* could not send email\n";
+         if(!$this->move($file,$this->getErrorPath($file)))
+            echo "* could not move file to error dir\n";
          return false;
       }
 
