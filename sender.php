@@ -2,6 +2,7 @@
 namespace DelayedMail;
 include_once "message.php";
 include_once "server.php";
+include_once "cleaner.php";
 
 class Sender {
    private $cfg;
@@ -42,8 +43,9 @@ class Sender {
       $cls  = $this->getCleanerClass();
       $time = $this->getClearTime();
 
-      if(!class_exists($cls))
+      if(!$cls) 
          return false;
+      echo "- cleaner class is $cls, cleaner time is $time minutes ago\n";
 
       $this->cleaner = new $cls($this->server->getSentPath(),$time);
       return $this->cleaner;
@@ -58,6 +60,8 @@ class Sender {
       $delivery_path = $this->server->getDeliveryPath();
 
       while(true) {
+         if($this->cleaner) 
+            $this->cleaner->run();
          sleep($this->interval);
 
          echo "- checking for files in {$delivery_path} ...\n";
