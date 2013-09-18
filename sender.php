@@ -7,11 +7,40 @@ class Sender {
    private $cfg;
    private $server;
    private $interval;
+   private $cleaner;
 
    public function __construct($interval=5,$cfg=null) {
       $this->cfg        = $cfg;
       $this->server     = new Server($this->cfg);
       $this->interval   = $interval;
+      $this->setCleaner();
+   }
+
+   private function getCleanerConfig() {
+      return $this->find('/^(cleaner\s?=\s?)(.*)/sim',file_get_contents($this->cfg));
+   }
+
+   private function setCleaner() {
+      $str    = $this->getCleanerConfig();
+      if(!$str)
+         return null;
+
+      $cls    = null;
+      $time   = null;
+      $tokens = explode(",",$str);
+      $cls    = trim($tokens[0]);
+      if(sizeof($tokens)>1)
+         $time = intval(trim($tokens[1]));
+      
+      if(!class_exists($cls))
+         return false;
+
+      $this->cleaner = new $cls($this->server->getSentPath(),$time);
+      return $this->cleaner;
+   }
+
+   public function getCleaner() {
+      return $this->cleaner;
    }
 
    public function run() {
