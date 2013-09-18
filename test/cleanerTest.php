@@ -6,7 +6,7 @@ class CleanerTest extends PHPUnit_Framework_TestCase {
    protected static $dir     = "/tmp/delayedmailtest/sent/";
 
    public function setUp() {
-      self::$cleaner = new DelayedMail\Cleaner(self::$dir,5);
+      self::$cleaner = new DelayedMail\Cleaner(self::$dir,0.1);
    }
 
    public function testToString() {
