@@ -20,18 +20,28 @@ class Sender {
       return $this->find('/^(cleaner\s?=\s?)(.*)/sim',file_get_contents($this->cfg));
    }
 
-   private function setCleaner() {
-      $str    = $this->getCleanerConfig();
+   private function getCleanerClass() {
+      $str = $this->getCleanerConfig();
       if(!$str)
          return null;
-
-      $cls    = null;
-      $time   = null;
       $tokens = explode(",",$str);
-      $cls    = trim($tokens[0]);
+      return trim($tokens[0]);
+   }
+
+   private function getClearTime() {
+      $str = $this->getCleanerConfig();
+      if(!$str)
+         return null;
+      $tokens = explode(",",$str);
       if(sizeof($tokens)>1)
-         $time = intval(trim($tokens[1]));
-      
+         return floatval(trim($tokens[1]));
+      return null;
+   }
+
+   private function setCleaner() {
+      $cls  = $this->getCleanerClass();
+      $time = $this->getClearTime();
+
       if(!class_exists($cls))
          return false;
 
