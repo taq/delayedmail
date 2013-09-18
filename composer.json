@@ -1,0 +1,19 @@
+{
+    "name": "taq/delayedmail",
+    "type": "library",
+    "description": "Queue email messages in files to send them later",
+    "keywords": ["queue","email","background"],
+    "homepage": "http://github.com/taq/delayedmail",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Eustaquio Rangel",
+            "email": "eustaquiorangel@gmail.com",
+            "homepage": "http://eustaquiorangel.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
