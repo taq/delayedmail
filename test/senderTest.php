@@ -1,6 +1,5 @@
 <?php
-include_once "../sender.php";
-include_once "../cleaner.php";
+include_once "../vendor/autoload.php";
 
 class SenderTest extends PHPUnit_Framework_TestCase {
    protected static $sender = null;

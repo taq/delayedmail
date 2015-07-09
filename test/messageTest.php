@@ -1,5 +1,5 @@
 <?php
-include_once "../message.php";
+include_once "../vendor/autoload.php";
 
 class MessageTest extends PHPUnit_Framework_TestCase {
    protected static $message = null;

@@ -1,6 +1,5 @@
 <?php
-include_once "../server.php";
-include_once "../message.php";
+include_once "../vendor/autoload.php";
 
 class ServerTest extends PHPUnit_Framework_TestCase {
    protected static $server = null;

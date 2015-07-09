@@ -1,8 +1,8 @@
 <?php
 namespace DelayedMail;
-include_once "message.php";
-include_once "server.php";
-include_once "cleaner.php";
+include_once "Message.php";
+include_once "Server.php";
+include_once "Cleaner.php";
 
 class Sender {
    private $cfg;

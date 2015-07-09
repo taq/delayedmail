@@ -1,5 +1,5 @@
 <?php
-include_once "../cleaner.php";
+include_once "../vendor/autoload.php";
 
 class CleanerTest extends PHPUnit_Framework_TestCase {
    protected static $cleaner = null;

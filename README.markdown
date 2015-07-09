@@ -24,6 +24,11 @@ path = /tmp/delayedmailtest
 The only different parameter there is the `path` parameter. This is where the
 mail files will be stored.
 
+**VERY IMPORTANT**
+
+If you use two-phase authentication on a Gmail account, **sending emails with this library
+will not work**. You need a less secure account to make it works.
+
 ## Storing messages to send later
 
 The data store used are just regular plain text files. They are stored on the

@@ -1,1 +1,3 @@
 delayedmail.ini
+vendor/*
+composer.lock
