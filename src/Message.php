@@ -1,90 +1,204 @@
 <?php
+/**
+ * Build a message
+ *
+ * PHP version 5.3
+ *
+ * @category Message
+ * @package  DelayedMail
+ * @author   Eustáquio Rangel <eustaquiorangel@gmail.com>
+ * @license  http://www.gnu.org/licenses/gpl-2.0.html GPLv2
+ * @link     http://github.com/taq/delayedmail
+ *
+ */
 namespace DelayedMail;
 
-class Message {
-   private $from     = null;
-   private $to       = null;
-   private $subject  = null;
-   private $text     = null;
-   private $type     = null;
-   private $files    = null;
-   private $marker   = null;
-   private $cc       = null;
+/**
+ * Main class
+ *
+ * PHP version 5.3
+ *
+ * @category Message
+ * @package  DelayedMail
+ * @author   Eustáquio Rangel <eustaquiorangel@gmail.com>
+ * @license  http://www.gnu.org/licenses/gpl-2.0.html GPLv2
+ * @link     http://github.com/taq/delayedmail
+ *
+ */
+class Message
+{
+    private $_from     = null;
+    private $_to       = null;
+    private $_subject  = null;
+    private $_text     = null;
+    private $_type     = null;
+    private $_files    = null;
+    private $_marker   = null;
+    private $_cc       = null;
 
-   public function __construct() {
-      $this->type  = "text/plain";
-      $this->files = array();
-   }
+    /**
+     * Constructor
+     */
+    public function __construct() 
+    {
+        $this->_type  = "text/plain";
+        $this->_files = array();
+    }
 
-   public function from($from) {
-      $this->from = $from;
-      return $this;
-   }
+    /**
+     * Who this message comes from
+     *
+     * @param string $from email address
+     *
+     * @return mixed the current object instance
+     */
+    public function from($from)
+    {
+        $this->_from = $from;
+        return $this;
+    }
 
-   public function to($to) {
-      $this->to = $to;
-      return $this;
-   }
+    /**
+     * Who this message goes to
+     *
+     * @param string $to email address
+     *
+     * @return mixed the current object instance
+     */
+    public function to($to)
+    {
+        $this->_to = $to;
+        return $this;
+    }
 
-   public function cc($cc) {
-      $this->cc = $cc;
-      return $this;
-   }
+    /**
+     * Who needs a carbon copy of this message
+     *
+     * @param string $cc email address
+     *
+     * @return mixed the current object instance
+     */
+    public function cc($cc) 
+    {
+        $this->_cc = $cc;
+        return $this;
+    }
 
-   public function subject($subject) {
-      $this->subject = $subject;
-      return $this;
-   }
+    /**
+     * What is this message subject
+     *
+     * @param string $subject message subject
+     *
+     * @return mixed the current object instance
+     */
+    public function subject($subject)
+    {
+        $this->_subject = $subject;
+        return $this;
+    }
 
-   public function text($text) {
-      $this->text = $text;
-      return $this;
-   }
+    /**
+     * What is this message text
+     *
+     * @param string $text message text
+     *
+     * @return mixed the current object instance
+     */
+    public function text($text)
+    {
+        $this->_text = $text;
+        return $this;
+    }
 
-   public function marker($marker) {
-      $this->marker = $marker;
-      return $this;
-   }
+    /**
+     * Message marker, used to split the attachments
+     *
+     * @param int $marker number
+     *
+     * @return mixed the current object instance
+     */
+    public function marker($marker)
+    {
+        $this->_marker = $marker;
+        return $this;
+    }
 
-   public function attach($file) {
-      if(is_array($file))
-         $this->files = array_merge($this->files,$file);
-      else
-         array_push($this->files,$file);
-      return $this;
-   }
+    /**
+     * Attachments
+     *
+     * Can be a string or an array
+     *
+     * @param mixed $file file
+     *
+     * @return mixed the current object instance
+     */
+    public function attach($file)
+    {
+        if (is_array($file)) {
+            $this->_files = array_merge($this->_files, $file);
+        } else {
+            array_push($this->_files, $file);
+        }
+        return $this;
+    }
 
-   private function ccText() {
-      if(is_null($this->cc))
-         return "";
-      $cc = "\nCc: ".(is_array($this->cc) ? join(", ",$this->cc) : $this->cc);
-      return $cc;
-   }
+    /**
+     * Carbon copy text
+     *
+     * @return string with all the needed emails
+     */
+    private function _ccText()
+    {
+        if (is_null($this->_cc)) {
+            return "";
+        }
+        $cc = "\nCc: ".(is_array($this->_cc) ? join(", ", $this->_cc) : $this->_cc);
+        return $cc;
+    }
 
-   private function header() {
-      $str = <<<EOT
-From: {$this->from}
-To: {$this->to}{$this->ccText()}
-Subject: {$this->subject}
+    /**
+     * Message header
+     *
+     * @return string with the header
+     */
+    private function _header()
+    {
+        $str = <<<EOT
+From: {$this->_from}
+To: {$this->_to}{$this->_ccText()}
+Subject: {$this->_subject}
 EOT;
-      return $str;
-   }
+        return $str;
+    }
 
-   private function simpleMessageText() {
-      $str = <<<EOT
-{$this->header()}
-Content-Type: {$this->type}
+    /**
+     * Return the simplified message text
+     *
+     * @return string text
+     */
+    private function _simpleMessageText()
+    {
+        $str = <<<EOT
+{$this->_header()}
+Content-Type: {$this->_type}
 
-{$this->text}
+{$this->_text}
 EOT;
-      return $str;
-   }
+        return $str;
+    }
 
-   private function attachmentsMessageText() {
-      $marker  = is_null($this->marker) ? time() : $this->marker;
-      $markert = $marker+1;
-      $str = <<<EOT
-{$this->header()}
+    /**
+     * Returns the attachment text
+     *
+     * @return string text
+     */
+    private function _attachmentsMessageText()
+    {
+        $marker  = is_null($this->_marker) ? time() : $this->_marker;
+        $markert = $marker + 1;
+
+        $str = <<<EOT
+{$this->_header()}
 Content-Type: multipart/mixed; boundary={$marker}
 
 --{$marker}
@@ -93,17 +207,18 @@ Content-Type: multipart/alternative; boundary={$markert}
 --{$markert}
 Content-Type: text/plain
 
-{$this->text}
+{$this->_text}
 
 --{$markert}--
 EOT;
 
-      foreach($this->files as $file) {
-         $contents = base64_encode(file_get_contents($file));
-         $contents = join("\n",str_split($contents,76));
-         $mime     = mime_content_type($file);
-         $base     = basename($file);
-         $file_str = <<<EOT
+        foreach ($this->_files as $file) {
+            $contents = base64_encode(file_get_contents($file));
+            $contents = join("\n", str_split($contents, 76));
+            $mime     = mime_content_type($file);
+            $base     = basename($file);
+
+            $file_str = <<<EOT
 \n\n--{$marker}
 Content-Type: {$mime}; name="{$base}"
 Content-Disposition: attachment; filename="{$base}"
@@ -112,16 +227,24 @@ X-Attachment-Id: 1
 
 $contents
 EOT;
-         $str .= $file_str;
-      }
-      $str .= "\n--{$marker}--";
-      return trim($str);
-   }
+            $str .= $file_str;
+        }
+        $str .= "\n--{$marker}--";
+        return trim($str);
+    }
 
-   public function __toString() {
-      if(sizeof($this->files)<1)
-         return $this->simpleMessageText();
-      return $this->attachmentsMessageText();
-   }
+    /**
+     * Convert the object instance to a string
+     *
+     * @return string 
+     */
+    public function __toString()
+    {
+        // if there is no attachments, return the simplified text version
+        if (sizeof($this->_files) < 1) {
+            return $this->_simpleMessageText();
+        }
+        return $this->_attachmentsMessageText();
+    }
 }
 ?>

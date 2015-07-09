@@ -1,202 +1,383 @@
 <?php
+/**
+ * The main object to send messages
+ *
+ * PHP version 5.3
+ *
+ * @category Sender
+ * @package  DelayedMail
+ * @author   Eustáquio Rangel <eustaquiorangel@gmail.com>
+ * @license  http://www.gnu.org/licenses/gpl-2.0.html GPLv2
+ * @link     http://github.com/taq/delayedmail
+ *
+ */
 namespace DelayedMail;
-include_once "Message.php";
-include_once "Server.php";
-include_once "Cleaner.php";
 
-class Sender {
-   private $cfg;
-   private $server;
-   private $interval;
-   private $cleaner;
+require_once "Message.php";
+require_once "Server.php";
+require_once "Cleaner.php";
 
-   public function __construct($interval=5,$cfg=null) {
-      $this->cfg        = $cfg;
-      $this->server     = new Server($this->cfg);
-      $this->interval   = $interval;
-      $this->setCleaner();
-   }
+/**
+ * Main class
+ *
+ * PHP version 5.3
+ *
+ * @category Sender
+ * @package  DelayedMail
+ * @author   Eustáquio Rangel <eustaquiorangel@gmail.com>
+ * @license  http://www.gnu.org/licenses/gpl-2.0.html GPLv2
+ * @link     http://github.com/taq/delayedmail
+ *
+ */
+class Sender
+{
+    private $_cfg;
+    private $_server;
+    private $_interval;
+    private $_cleaner;
 
-   private function getCleanerConfig() {
-      return $this->find('/^(cleaner\s?=\s?)(.*)/sim',file_get_contents($this->cfg));
-   }
+    /**
+     * Constructor
+     *
+     * @param int    $interval to check
+     * @param string $cfg      configuration file
+     */
+    public function __construct($interval = 5, $cfg = null)
+    {
+        $this->_cfg        = $cfg;
+        $this->_server     = new Server($this->_cfg);
+        $this->_interval   = $interval;
+        $this->_setCleaner();
+    }
 
-   private function getCleanerClass() {
-      $str = $this->getCleanerConfig();
-      if(!$str)
-         return null;
-      $tokens = explode(",",$str);
-      return trim($tokens[0]);
-   }
+    /**
+     * Find the cleaner config line
+     *
+     * @return string cleaner config line
+     */
+    private function _getCleanerConfig()
+    {
+        return $this->_find('/^(cleaner\s?=\s?)(.*)/sim', file_get_contents($this->_cfg));
+    }
 
-   private function getClearTime() {
-      $str = $this->getCleanerConfig();
-      if(!$str)
-         return null;
-      $tokens = explode(",",$str);
-      if(sizeof($tokens)>1)
-         return floatval(trim($tokens[1]));
-      return null;
-   }
+    /**
+     * Find the cleaner class
+     *
+     * @return string cleaner class
+     */
+    private function _getCleanerClass()
+    {
+        $str = $this->_getCleanerConfig();
+        if (!$str) {
+            return null;
+        }
+        $tokens = explode(",", $str);
+        return trim($tokens[0]);
+    }
 
-   private function setCleaner() {
-      $cls  = $this->getCleanerClass();
-      $time = $this->getClearTime();
+    /**
+     * Find the cleaner time
+     *
+     * @return string cleaner time
+     */
+    private function _getClearTime()
+    {
+        $str = $this->_getCleanerConfig();
+        if (!$str) {
+            return null;
+        }
+        $tokens = explode(",", $str);
+        if (sizeof($tokens) > 1) {
+            return floatval(trim($tokens[1]));
+        }
+        return null;
+    }
 
-      if(!$cls) 
-         return false;
-      echo "- cleaner class is $cls, cleaner time is $time minutes ago\n";
+    /**
+     * Create the cleaner class
+     *
+     * @return mixed cleaner class instance
+     */
+    private function _setCleaner()
+    {
+        $cls  = $this->_getCleanerClass();
+        $time = $this->_getClearTime();
 
-      $this->cleaner = new $cls($this->server->getSentPath(),$time);
-      return $this->cleaner;
-   }
+        if (!$cls) {
+            return null;
+        }
+        echo "- cleaner class is $cls, cleaner time is $time minutes ago\n";
 
-   public function getCleaner() {
-      return $this->cleaner;
-   }
+        $this->_cleaner = new $cls($this->_server->getSentPath(), $time);
+        return $this->_cleaner;
+    }
 
-   public function run() {
-      echo "- initializing ...\n";
-      $delivery_path = $this->server->getDeliveryPath();
+    /**
+     * Return the cleaner config line
+     *
+     * @return mixed cleaner class
+     */
+    public function getCleaner()
+    {
+        return $this->_cleaner;
+    }
 
-      while(true) {
-         if($this->cleaner) 
-            $this->cleaner->run();
-         sleep($this->interval);
+    /**
+     * Run
+     *
+     * @return null
+     */
+    public function run()
+    {
+        echo "- initializing ...\n";
+        $delivery_path = $this->_server->getDeliveryPath();
 
-         echo "- checking for files in {$delivery_path} ...\n";
-         $files = array_filter(glob("$delivery_path/*"),function($file) {
-            return filesize($file)>0;
-         });
+        while (true) {
+            if ($this->_cleaner) {
+                $this->_cleaner->run();
+            }
+            sleep($this->_interval);
 
-         if(sizeof($files)<1) {
-            echo "- no files found.\n";
-            continue;
-         }
-         echo "- ".sizeof($files)." file(s) found.\n";
+            echo "- checking for files in {$delivery_path} ...\n";
+            $files = array_filter(glob("$delivery_path/*"),
+                function($file) {
+                    return filesize($file)>0;
+                }
+            );
 
-         if(!$this->server->open()) {
-            echo "* could not open mail server.\n";
-            continue;
-         }
+            if (sizeof($files) < 1) {
+                echo "- no files found.\n";
+                continue;
+            }
 
-         foreach($files as $file) 
-            $this->proc($file);
+            echo "- ".sizeof($files)." file(s) found.\n";
 
-         $this->server->close();
-      }
-   }
+            if (!$this->_server->open()) {
+                echo "* could not open mail server.\n";
+                continue;
+            }
 
-   private function getSentPath($file) {
-      $sent_path = $this->server->getSentPath();
-      return "$sent_path/".basename($file);
-   }
+            foreach ($files as $file) {
+                $this->_proc($file);
+            }
 
-   private function getErrorPath($file) {
-      $error_path = $this->server->getErrorPath();
-      return "$error_path/".basename($file);
-   }
+            $this->_server->close();
+        }
+    }
 
-   private function proc($file) {
-      echo "- processing $file ...\n";
-      $contents = file_get_contents($file);
+    /**
+     * Return the full path where the sent message file is
+     *
+     * @param string $file message file
+     *
+     * @return string directory
+     */
+    private function _getSentPath($file)
+    {
+        $sent_path = $this->_server->getSentPath();
+        return "$sent_path/".basename($file);
+    }
 
-      $from = $this->getFrom($contents);
-      $to   = $this->getTo($contents);
-      $cc   = $this->getCC($contents);
-      $subj = $this->getSubject($contents);
-      $subj = $this->getSubject($contents);
-      $type = $this->getContentType($contents);
-      $text = $this->getText($contents);
+    /**
+     * Return the full path where the error message file is
+     *
+     * @param string $file message file
+     *
+     * @return string directory
+     */
+    private function _getErrorPath($file)
+    {
+        $error_path = $this->_server->getErrorPath();
+        return "$error_path/".basename($file);
+    }
 
-      $stripped_from = $this->getStrippedEmail($from);
-      $stripped_to   = $this->getStrippedEmail($to);
+    /**
+     * Process all the found files
+     *
+     * @param string $file file
+     *
+     * @return boolean ok or not
+     */
+    private function _proc($file)
+    {
+        echo "- processing $file ...\n";
+        $contents = file_get_contents($file);
 
-      $this->server->setError(false);
+        $from = $this->_getFrom($contents);
+        $to   = $this->_getTo($contents);
+        $cc   = $this->_getCC($contents);
+        $subj = $this->_getSubject($contents);
+        $type = $this->_getContentType($contents);
+        $text = $this->_getText($contents);
 
-      $rst  = "";
-      $rst .= $this->server->command("MAIL FROM: <$stripped_from>\r\n",true);
-      $rst .= $this->server->command("RCPT TO: <$stripped_to>\r\n",true);
+        $stripped_from = $this->_getStrippedEmail($from);
+        $stripped_to   = $this->_getStrippedEmail($to);
 
-      if(!is_null($cc)) {
-         $tokens = explode(",",$cc);
-         foreach($tokens as $cc) {
-            $cc = $this->getStrippedEmail($cc);
-            $rst .= $this->server->command("RCPT TO: <$cc>\r\n",true);
-         }
-      }
+        $this->_server->setError(false);
 
-      $rst .= $this->server->command("DATA\r\n",true);
-      $rst .= $this->server->command("From: $from\n",false);
-      $rst .= $this->server->command("To: $to\n",false);
+        $rst  = "";
+        $rst .= $this->_server->command("MAIL FROM: <$stripped_from>\r\n", true);
+        $rst .= $this->_server->command("RCPT TO: <$stripped_to>\r\n", true);
 
-      if(!is_null($cc))
-         $rst .= $this->server->command("Cc: $cc\n",false);
-      
-      $rst .= $this->server->command("Content-Type: $type\r\n",false);
-      $rst .= $this->server->command("Subject: $subj\n\n",false);
-      $rst .= $this->server->command("$text\r\n",false);
-      $rst .= $this->server->command("\r\n.\r\n",true);
-      $this->server->flush();
+        if (!is_null($cc)) {
+            $tokens = explode(",", $cc);
+            foreach ($tokens as $cc) {
+                $cc = $this->_getStrippedEmail($cc);
+                $rst .= $this->_server->command("RCPT TO: <$cc>\r\n", true);
+            }
+        }
 
-      if($this->server->getError()) {
-         echo "* could not send email\n";
-         if(!$this->move($file,$this->getErrorPath($file)))
-            echo "* could not move file to error dir\n";
-         return false;
-      }
+        $rst .= $this->_server->command("DATA\r\n", true);
+        $rst .= $this->_server->command("From: $from\n", false);
+        $rst .= $this->_server->command("To: $to\n", false);
 
-      if(!$this->move($file,$this->getSentPath($file)))
-         return false;
-      return true;
-   }
+        if (!is_null($cc)) {
+            $rst .= $this->_server->command("Cc: $cc\n", false);
+        }
 
-   private function find($regex,$contents,$default=null) {
-      $ok = preg_match($regex,$contents,$matches);
-      if(!$ok)
-         return $default;
-      return $matches[2];
-   }
+        $rst .= $this->_server->command("Content-Type: $type\r\n", false);
+        $rst .= $this->_server->command("Subject: $subj\n\n", false);
+        $rst .= $this->_server->command("$text\r\n", false);
+        $rst .= $this->_server->command("\r\n.\r\n", true);
+        $this->_server->flush();
 
-   private function getFrom($contents) {
-      return $this->find('/^(From:\s?)([^\n]+)/sim',$contents);
-   }
+        if ($this->_server->getError()) {
+            echo "* could not send email\n";
+            if (!$this->_move($file, $this->_getErrorPath($file))) {
+                echo "* could not move file to error dir\n";
+            }
+            return false;
+        }
 
-   private function getTo($contents) {
-      return $this->find('/^(To:\s?)([^\n]+)/sim',$contents);
-   }
+        if (!$this->_move($file, $this->_getSentPath($file))) {
+            return false;
+        }
+        return true;
+    }
 
-   private function getCC($contents) {
-      return $this->find('/^(Cc:\s?)([^\n]+)/sim',$contents);
-   }
+    /**
+     * Find an expression on a string, returning the default value if not found
+     *
+     * @param string $regex    regular expression
+     * @param string $contents content to be searched
+     * @param mixed  $default  default value to return if expression not found
+     *
+     * @return matches
+     */
+    private function _find($regex, $contents, $default = null)
+    {
+        $ok = preg_match($regex, $contents, $matches);
+        if (!$ok) {
+            return $default;
+        }
+        return $matches[2];
+    }
 
-   private function getSubject($contents) {
-      return $this->find('/^(Subject:\s?)([^\n]+)/sim',$contents);
-   }
+    /**
+     * Return the from info
+     *
+     * @param string $contents of the message
+     *
+     * @return string from
+     */
+    private function _getFrom($contents)
+    {
+        return $this->_find('/^(From:\s?)([^\n]+)/sim', $contents);
+    }
 
-   private function getContentType($contents) {
-      return $this->find('/^(Content-Type:\s?)([^\n]+)/sim',$contents);
-   }
+    /**
+     * Return the to info
+     *
+     * @param string $contents of the message
+     *
+     * @return string to
+     */
+    private function _getTo($contents)
+    {
+        return $this->_find('/^(To:\s?)([^\n]+)/sim', $contents);
+    }
 
-   private function getText($contents) {
-      $tokens = preg_split('/\n\n/sim',$contents);
-      if(sizeof($tokens)<2)
-         return null;
-      $text = join("\n\n",array_slice($tokens,1));
-      return $text;
-   }
+    /**
+     * Return the CC info
+     *
+     * @param string $contents of the message
+     *
+     * @return string CC
+     */
+    private function _getCC($contents) 
+    {
+        return $this->_find('/^(Cc:\s?)([^\n]+)/sim', $contents);
+    }
 
-   private function getStrippedEmail($email) {
-      return $this->find('/(<)(.*)(>)/',$email,$email);
-   }
+    /**
+     * Return the subject info
+     *
+     * @param string $contents of the message
+     *
+     * @return string subject
+     */
+    private function _getSubject($contents)
+    {
+        return $this->_find('/^(Subject:\s?)([^\n]+)/sim', $contents);
+    }
 
-   private function move($from,$to) {
-      echo "- moving $from to $to\n";
-      if(!rename($from,$to)) {
-         echo "* error: could not move file $from to $to\n";
-         return false;
-      }
-      return true;
-   }
+    /**
+     * Return the content type
+     *
+     * @param string $contents of the message
+     *
+     * @return string content type
+     */
+    private function _getContentType($contents)
+    {
+        return $this->_find('/^(Content-Type:\s?)([^\n]+)/sim', $contents);
+    }
+
+    /**
+     * Return the message text
+     *
+     * @param string $contents of the message
+     *
+     * @return string text
+     */
+    private function _getText($contents) 
+    {
+        $tokens = preg_split('/\n\n/sim', $contents);
+        if (sizeof($tokens) < 2) {
+            return null;
+        }
+        $text = join("\n\n", array_slice($tokens, 1));
+        return $text;
+    }
+
+    /**
+     * Return the stripped email address
+     *
+     * @param string $email address
+     *
+     * @return string address
+     */
+    private function _getStrippedEmail($email)
+    {
+        return $this->_find('/(<)(.*)(>)/', $email, $email);
+    }
+
+    /**
+     * Move (renaming) a file from a directory to another
+     *
+     * @param string $from origin dir
+     * @param string $to   destination dir
+     *
+     * @return boolean moved or not
+     */
+    private function _move($from, $to)
+    {
+        echo "- moving $from to $to\n";
+        if (!rename($from, $to)) {
+            echo "* error: could not move file $from to $to\n";
+            return false;
+        }
+        return true;
+    }
 }
 ?>
