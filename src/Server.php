@@ -229,7 +229,6 @@ class Server
             if ($this->_tls) {
                 $this->command("STARTTLS\n");
                 stream_socket_enable_crypto($this->_handle, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-                $this->_ehlo();
             }
 
             $this->command("AUTH LOGIN\r\n");
@@ -309,6 +308,7 @@ class Server
         if (preg_match('/STARTTLS/sim', $str)) {
             $this->_tls = true;
             $this->_auth();
+            return true;
         }
 
         if (preg_match('/250 AUTH/sim', $str)) {
