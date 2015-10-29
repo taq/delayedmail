@@ -57,6 +57,10 @@ class Sender
      */
     private function _getCleanerConfig()
     {
+        if (!file_exists($this->_cfg)) {
+            echo "* config file ".$this->_cfg." does not exists!\n";
+            exit(1);
+        }
         return $this->_find('/^(cleaner\s?=\s?)(.*)/sim', file_get_contents($this->_cfg));
     }
 
@@ -125,14 +129,24 @@ class Sender
     /**
      * Run
      *
+     * @param mixed $options options
+     *
      * @return null
      */
-    public function run()
+    public function run($options)
     {
         echo "- initializing ...\n";
-        $delivery_path = $this->_server->getDeliveryPath();
 
-        while (true) {
+        $delivery_path = $this->_server->getDeliveryPath();
+        $cnt           = 0;
+        $max           = 0;
+
+        if (array_key_exists("q", $options)) {
+            echo "- not running on a loop.\n";
+            $max = 1;
+        }
+
+        while ($max == 0 || $cnt < $max) {
             if ($this->_cleaner) {
                 $this->_cleaner->run();
             }
@@ -144,6 +158,7 @@ class Sender
                     return filesize($file)>0;
                 }
             );
+            $cnt ++;
 
             if (sizeof($files) < 1) {
                 echo "- no files found.\n";

@@ -5,7 +5,7 @@
     "keywords": ["queue","email","background"],
     "homepage": "http://github.com/taq/delayedmail",
     "license": "GPL",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "authors": [
         {
             "name": "Eustaquio Rangel",
