@@ -203,6 +203,11 @@ class Server
         if (!$this->_handle) {
             return false;
         }
+        
+        stream_context_set_option($this->_handle, 'ssl', 'verify_host',      false);
+        stream_context_set_option($this->_handle, 'ssl', 'verify_peer_name', false);
+        stream_context_set_option($this->_handle, 'ssl', 'verify_peer',      false);
+
         $this->_wait();
         $this->_ehlo();
         return $this->_handle;
