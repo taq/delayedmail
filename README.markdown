@@ -45,7 +45,7 @@ The data store used are just regular plain text files. They are stored on the
 Just include the `delayedmail.php` on your app, create a new `Server` object,
 configure it, compose and queue a new message:
 
-```
+```php
 <?php
    include_once "delayedmail.php";
 
@@ -71,7 +71,7 @@ You can use arrays on `attach` and `cc`.
 Just edit the `runner.php` file with the desired interval and configuration file
 (usually the same config file as the server) and run it from the command line:
 
-```
+```php
 <?php
 $dir = dirname(__FILE__);
 echo "- loading classes from $dir\n";
@@ -82,7 +82,7 @@ $sender->run();
 ?>
 ```
 
-```
+```php
 $ php runner.php
 - initializing ...
 - checking for files in /tmp/delayedmailtest/delivery ...
