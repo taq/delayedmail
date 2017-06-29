@@ -121,13 +121,38 @@ EOT;
      */
     public function testToStringWithAttachments()
     {
-        self::$message->from("Eustaquio Rangel <eustaquiorangel@gmail.com>")
-            ->to("Eustaquio Rangel <taq@bluefish.com.br>")
-            ->subject("DelayedMail test!")
-            ->text("This is just\na test!")
-            ->attach(array("./taq.jpg","./qat.jpg"))
-            ->marker(1378910636);
-        $this->assertEquals(trim(file_get_contents("attachment.txt")), trim(self::$message));
+       self::$message->from("Eustaquio Rangel <eustaquiorangel@gmail.com>")
+          ->to("Eustaquio Rangel <taq@bluefish.com.br>")
+          ->subject("DelayedMail test!")
+          ->text("This is just\na test!")
+          ->attach(array("./taq.jpg","./qat.jpg"))
+          ->marker(1378910636);
+       $this->assertEquals(trim(file_get_contents("attachment.txt")), trim(self::$message));
+    }
+
+    /**
+     * Test sending a HTML message
+     *
+     * @return null
+     */
+    public function testHTMLMessage()
+    {
+       self::$message->setType("text/html");
+       self::$message->from("Eustaquio Rangel <eustaquiorangel@gmail.com>")
+          ->to("Eustaquio Rangel <taq@bluefish.com.br>")
+          ->subject("DelayedMail test!")
+          ->text("This is just\na test!");
+       $str = self::$message;
+       $exp = <<<EOT
+From: Eustaquio Rangel <eustaquiorangel@gmail.com>
+To: Eustaquio Rangel <taq@bluefish.com.br>
+Subject: DelayedMail test!
+Content-Type: text/html
+
+This is just
+a test!
+EOT;
+       $this->assertEquals(trim($exp), trim($str));
     }
 }
 ?>

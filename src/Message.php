@@ -205,7 +205,7 @@ Content-Type: multipart/mixed; boundary={$marker}
 Content-Type: multipart/alternative; boundary={$markert}
 
 --{$markert}
-Content-Type: text/plain
+Content-Type: {$this->_type}
 
 {$this->_text}
 
@@ -245,6 +245,18 @@ EOT;
             return $this->_simpleMessageText();
         }
         return $this->_attachmentsMessageText();
+    }
+
+    /**
+     * Set the message type
+     *
+     * @param String $type message type
+     * 
+     * @return null
+     */
+    public function setType($type)
+    {
+       $this->_type = $type;
     }
 }
 ?>

@@ -133,7 +133,7 @@ class Sender
      *
      * @return null
      */
-    public function run($options)
+    public function run($options = [])
     {
         echo "- initializing ...\n";
 

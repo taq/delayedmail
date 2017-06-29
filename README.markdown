@@ -88,3 +88,24 @@ $ php runner.php
 - checking for files in /tmp/delayedmailtest/delivery ...
 - no files found.
 ```
+
+## Testing
+
+### Sending emails
+
+Go to the `test` directory, configure the `delayedmail.ini` and `test.php` files
+to the configs you want, and run:
+
+```
+$ php test.php
+```
+
+And then check your email app on the addresses you configured.
+
+### Code
+
+Run `composer update`, go to the `test` directory and run:
+
+```
+$ phpunit .
+```
