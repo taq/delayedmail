@@ -9,7 +9,6 @@
  * @author   Eustáquio Rangel <eustaquiorangel@gmail.com>
  * @license  http://www.gnu.org/licenses/gpl-2.0.html GPLv2
  * @link     http://github.com/taq/delayedmail
- *
  */
 namespace DelayedMail;
 
@@ -23,7 +22,6 @@ namespace DelayedMail;
  * @author   Eustáquio Rangel <eustaquiorangel@gmail.com>
  * @license  http://www.gnu.org/licenses/gpl-2.0.html GPLv2
  * @link     http://github.com/taq/delayedmail
- *
  */
 class Server
 {

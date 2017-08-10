@@ -1,3 +1,5 @@
 engines:
   phpcodesniffer:
     enabled: true
+    standard: "PSR2"
+    ignore_warnings: true
